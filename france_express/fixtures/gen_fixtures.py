@@ -6,6 +6,11 @@ from decimal import Decimal as D
 
 FRANCE_EXPRESS_THRESHOLD_WEIGHT = 100
 
+def json_out( astr, is_first=False ):
+    if not is_first:
+        print ","
+    print astr.replace("'","\"").replace("u\"","\""),
+
 def main():
     """Quick and dirty script to generate fixtures (initial data) from france express flat file
     """
@@ -17,7 +22,7 @@ def main():
     ratefile = sys.argv[1]
     f = open(ratefile)
     data = f.readlines()
-    json_p = '  {"pk": %d, "model": "france_express.%s", "fields": %s},'
+    json_p = '  {"pk": %d, "model": "france_express.%s", "fields": %s}'
     offer_p = re.compile(u'^;;(.*)$')
     zone_p = re.compile(u'^::Zone::(.*)$')
     weights_p = re.compile(u'^::Weights$')
@@ -29,6 +34,7 @@ def main():
     
     for i in range(0,len(data)):
         l = data[i].strip()
+        printed = False
         
         # Skip empty lines or commentaries
         if not len(l) or l[0] == "#":
@@ -41,7 +47,7 @@ def main():
             offer_id += 1
             zones = []
             out = json_p % ( offer_id, "offer", { "name":offer_name })
-            print out
+            json_out( out, offer_id == 1 )
             
         # Zone
         elif zone_p.match(l):
@@ -49,14 +55,14 @@ def main():
             zone_id += 1
             zones.append(zone_id)
             out = json_p % ( zone_id, "zone", { "name":zone_name, "offer":offer_id })
-            print out
+            json_out( out )            
 
             # Department
             for dept in [ int(d) for d in data[i+1].split() ]:
                 dept_id += 1
                 out = json_p % ( dept_id, "department", { "number":dept, "zone":zone_id })
-                print out
-                
+                json_out( out )
+                                                    
         # Weights
         elif weights_p.match(l):
             # Ignore the last weight that is used for weights > 100kg
@@ -72,7 +78,8 @@ def main():
                     for r in range(len(weights)):                                        
                         rate_id += 1
                         out = json_p % ( rate_id, "rate", { "weight":"%.2f"%(w*FRANCE_EXPRESS_THRESHOLD_WEIGHT+weights[r]), "price":"%.2f"%(w*t_price+prices[r]), "zone":zones[z] })
-                        print out
+                        json_out( out )                        
+                                    
     print "]"
     f.close()
     

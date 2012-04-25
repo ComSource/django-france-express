@@ -21,19 +21,20 @@ class Zone(models.Model):
 
 class Department(models.Model):
     
-    number = models.Integer(max_length=3)
+    number = models.IntegerField(max_length=3)
     zone = models.ForeignKey(Zone)
 
 class Rate(models.Model):
     
-    weight = models.DecimalField(max_digits=5, decimal_places=2)
-    price = models.DecimalField(max_digits=5, decimal_places=2)
+    weight = models.DecimalField(max_digits=7, decimal_places=2)
+    price = models.DecimalField(max_digits=7, decimal_places=2)
     zone = models.ForeignKey(Zone)
 
     def __repr__(self):
-        return "<Rate: max %.2fkg (%s) %.2f EUR>" % (self.weight, self.zone, self.price)
+        return "<Rate: max %.2fkg (%s) %.2f EUR>" % (self.weight, self.zone.name, self.price)
     
-    def get_rate(department_number, weight):
+    @staticmethod
+    def get_rates(department_number, weight):
         
         if type(department_number) != types.IntType:
             raise TypeError, "Country must be a string, not %s" % type(country)
@@ -47,7 +48,7 @@ class Rate(models.Model):
         rs = []
         for zone in [ d.zone for d in Department.objects.filter(number=department_number) ]:
             w = Rate.objects.filter(weight__gte=Decimal(str(weight)), zone=zone)[0].weight
-            rs += Rate.objects.get(weight=w, zone=zone)
+            rs.append(Rate.objects.get(weight=w, zone=zone))
             
         return sorted(rs, key=lambda rate: rate.price)
 

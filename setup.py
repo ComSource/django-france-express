@@ -28,6 +28,7 @@ setup(
 		'Operating System :: OS Independent',
 		'Programming Language :: Python',
 		'Framework :: Django'],
-    packages = find_packages(),
+    packages = ['france_express'],
     include_package_data = True,
+    setup_requires = [ "setuptools_git >= 0.3", ],
 )
