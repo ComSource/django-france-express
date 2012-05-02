@@ -37,7 +37,7 @@ class Rate(models.Model):
     def get_rates(department_number, weight):
         
         if type(department_number) != types.IntType:
-            raise TypeError, "Country must be a string, not %s" % type(country)
+            raise TypeError, "Country must be a string, not %s" % type(department_number)
         
         if type(weight) != types.FloatType and type(weight) != types.IntType:
             raise TypeError, "Weight must be a float"
